@@ -1,0 +1,5 @@
+# Placeholder robots.txt — update Sitemap domain before production deployment
+User-agent: *
+Allow: /
+
+Sitemap: https://example.com/sitemap.xml
