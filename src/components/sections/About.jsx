@@ -1,6 +1,10 @@
+import { useState, useEffect } from 'react';
 import { m, useReducedMotion } from 'framer-motion';
-import { CheckCircle2, Mail, MapPin, Phone } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, ChevronRight, Mail, MapPin, Phone } from 'lucide-react';
 import officeBoardImage from '../../assets/images/image1.jpeg';
+import advisorImage2 from '../../assets/images/image2.jpeg';
+import advisorImage3 from '../../assets/images/image3.jpeg';
+import advisorImage4 from '../../assets/images/image4.jpeg';
 import Badge from '../common/Badge';
 import Container from '../common/Container';
 import PrimaryButton from '../common/PrimaryButton';
@@ -16,11 +20,74 @@ const ABOUT_PILLARS = [
   'Direct communication by phone, WhatsApp, or email—without call-center queues.',
 ];
 
+const PROFILE_SLIDES = [
+  {
+    id: 'signboard',
+    src: officeBoardImage,
+    alt: `${BUSINESS_INFO.businessName} office signboard for ${BUSINESS_INFO.ownerName} in ${BUSINESS_INFO.address.locality}`,
+    title: 'Office Signboard',
+    subtitle: 'Belgharia Service Desk',
+    objectPosition: 'object-center',
+    objectFit: 'object-contain',
+    bgClass: 'bg-white',
+  },
+  {
+    id: 'advisor-uniform',
+    src: advisorImage2,
+    alt: `${BUSINESS_INFO.ownerName} - Authorized LIC Insurance Advisor at Belgharia`,
+    title: 'Authorized Advisor',
+    subtitle: 'On-Field Client Assistance',
+    objectPosition: 'object-[center_12%]',
+    objectFit: 'object-cover',
+    bgClass: 'bg-surface-light',
+  },
+  {
+    id: 'advisor-docs',
+    src: advisorImage3,
+    alt: `${BUSINESS_INFO.ownerName} assisting with LIC policy paperwork and claims`,
+    title: 'Policy Guidance',
+    subtitle: 'Documentation & Claims Help',
+    objectPosition: 'object-[center_24%]',
+    objectFit: 'object-cover',
+    bgClass: 'bg-surface-light',
+  },
+  {
+    id: 'advisor-profile',
+    src: advisorImage4,
+    alt: `${BUSINESS_INFO.ownerName} - Experienced LIC Advisor serving Kolkata`,
+    title: 'Client Advisory',
+    subtitle: 'Personalized Insurance Planning',
+    objectPosition: 'object-[center_18%]',
+    objectFit: 'object-cover',
+    bgClass: 'bg-surface-light',
+  },
+];
+
 /**
- * Framed office board visual for LIC PREMIUM POINT with clean architectural navy & gold accents.
+ * Framed office board & advisor image gallery for LIC PREMIUM POINT with continuous 2s auto-rotation.
  */
 function AdvisorProfileFrame() {
   const { businessName, ownerName, address, contact } = BUSINESS_INFO;
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Automatically cycle through images every 2 seconds (setTimeout 2000ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCurrentIndex((prev) => (prev + 1) % PROFILE_SLIDES.length);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [currentIndex]);
+
+  const handlePrev = () => {
+    setCurrentIndex((prev) => (prev - 1 + PROFILE_SLIDES.length) % PROFILE_SLIDES.length);
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev + 1) % PROFILE_SLIDES.length);
+  };
+
+  const currentSlide = PROFILE_SLIDES[currentIndex];
 
   return (
     <div className="relative mx-auto w-full max-w-md lg:max-w-none">
@@ -41,17 +108,85 @@ function AdvisorProfileFrame() {
           </div>
         </div>
 
+        {/* Image Slideshow Frame */}
         <div className="rounded-lg border border-navy-100 bg-white p-2.5 shadow-xs sm:p-3.5">
-          <div className="relative aspect-[2/1] w-full overflow-hidden rounded bg-white">
-            <img
-              src={officeBoardImage}
-              alt={`${businessName} office signboard for ${ownerName} in ${address.locality}, ${address.city}`}
-              width={1024}
-              height={768}
-              loading="lazy"
-              decoding="async"
-              className="h-full w-full scale-[1.07] object-cover object-center select-none"
-            />
+          <div className="group relative aspect-[4/3] w-full overflow-hidden rounded bg-surface-light">
+            {PROFILE_SLIDES.map((slide, index) => {
+              const isActive = index === currentIndex;
+              return (
+                <div
+                  key={slide.id}
+                  className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+                    isActive ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'
+                  } ${slide.bgClass}`}
+                  aria-hidden={!isActive}
+                >
+                  <img
+                    src={slide.src}
+                    alt={slide.alt}
+                    width={1024}
+                    height={768}
+                    loading={index === 0 ? 'eager' : 'lazy'}
+                    decoding="async"
+                    className={`h-full w-full ${slide.objectFit} ${slide.objectPosition} select-none`}
+                  />
+                </div>
+              );
+            })}
+
+            {/* Previous & Next manual control arrows */}
+            <button
+              type="button"
+              onClick={handlePrev}
+              aria-label="Previous photo"
+              className="absolute left-2.5 top-1/2 z-20 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-navy-950/65 text-white backdrop-blur-xs transition-all duration-200 opacity-0 group-hover:opacity-100 hover:bg-navy-950 hover:scale-105 focus:opacity-100 focus:outline-none"
+            >
+              <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              onClick={handleNext}
+              aria-label="Next photo"
+              className="absolute right-2.5 top-1/2 z-20 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-navy-950/65 text-white backdrop-blur-xs transition-all duration-200 opacity-0 group-hover:opacity-100 hover:bg-navy-950 hover:scale-105 focus:opacity-100 focus:outline-none"
+            >
+              <ChevronRight className="h-4 w-4" aria-hidden="true" />
+            </button>
+
+            {/* Bottom Caption & Pagination Bar */}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-end justify-between gap-2 p-3 bg-gradient-to-t from-navy-950/80 via-navy-950/35 to-transparent pt-8">
+              <div className="flex items-center gap-1.5 rounded-full bg-navy-950/70 px-2.5 py-1 text-[11px] font-medium text-white shadow-xs backdrop-blur-xs">
+                <span className="h-1.5 w-1.5 rounded-full bg-lic-yellow animate-pulse" aria-hidden="true" />
+                <span className="truncate max-w-[130px] sm:max-w-none">{currentSlide.title}</span>
+                <span className="text-white/40">•</span>
+                <span className="font-semibold text-lic-yellow">{currentIndex + 1}/{PROFILE_SLIDES.length}</span>
+              </div>
+
+              {/* Indicator dots */}
+              <div
+                className="pointer-events-auto flex items-center gap-1.5 rounded-full bg-navy-950/60 px-2 py-1 backdrop-blur-xs"
+                role="tablist"
+                aria-label="Photo carousel navigation"
+              >
+                {PROFILE_SLIDES.map((slide, index) => {
+                  const isActive = index === currentIndex;
+                  return (
+                    <button
+                      key={slide.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      aria-label={`View ${slide.title} (${index + 1} of ${PROFILE_SLIDES.length})`}
+                      onClick={() => setCurrentIndex(index)}
+                      className={`h-2 rounded-full transition-all duration-300 focus:outline-none ${
+                        isActive
+                          ? 'w-5 bg-lic-yellow shadow-xs'
+                          : 'w-2 bg-white/60 hover:bg-white hover:scale-110'
+                      }`}
+                    />
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
 
